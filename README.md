@@ -75,6 +75,10 @@ parte2_docker/
 │       └── reporte.html              # Reporte de estadísticas
 ├── requirements.txt                  # Dependencias del servicio (producción)
 ├── requirements-entrenamiento.txt    # + dependencias del entrenamiento (matplotlib)
+├── requirements-test.txt             # + pytest (pruebas unitarias)
+├── pytest.ini                        # Configuración de pytest
+├── tests/                            # Pruebas unitarias del modelo y las estadísticas
+├── .github/workflows/workflow.yaml   # Pipeline de CI/CD con GitHub Actions
 ├── Dockerfile                        # Multi-etapa: entrenamiento -> servicio
 ├── docker-compose.yml                # Construir y correr con un solo comando
 ├── .dockerignore
@@ -364,3 +368,61 @@ python -m servicio.app
 ```
 
 Luego abrir `http://localhost:5000`. Para probar solo la predicción por consola: `python -m src.prediccion`.
+
+---
+
+## 13. Pruebas unitarias
+
+Las pruebas están en `tests/test_modelo.py` y usan **pytest**:
+
+| Prueba | Qué verifica |
+|---|---|
+| `test_prediccion_retorna_estado_esperado` | Dados unos parámetros, el modelo retorna el estado esperado (un caso por cada uno de los 5 estados) |
+| `test_modelo_obtiene_las_cinco_categorias` | Con distintos grupos de parámetros se obtienen las 5 categorías |
+| `test_estadisticas_vacias_antes_de_predecir` | Antes de predecir, `/estadisticas` trae los valores por defecto |
+| `test_ultima_prediccion_aparece_en_estadisticas` | Tras predecir, `/estadisticas` reporta esa predicción como la última |
+| `test_estadisticas_guardan_solo_las_ultimas_cinco` | Se cuentan todas las predicciones pero solo se listan las 5 últimas |
+| `test_entrada_fuera_de_rango_retorna_error` | Una entrada inválida responde con error 400 |
+
+Correrlas localmente (Python 3.12):
+
+```bash
+pip install -r requirements-test.txt
+```
+
+```bash
+pytest
+```
+
+Si el modelo no está entrenado, las pruebas ejecutan primero `python -m src.pipeline`. Cada prueba usa un log de predicciones temporal, así no se mezclan los resultados.
+
+---
+
+## 14. CI/CD con GitHub Actions
+
+La rama `main` está **protegida**: solo recibe cambios por pull request. El pipeline está en [`.github/workflows/workflow.yaml`](.github/workflows/workflow.yaml):
+
+```mermaid
+flowchart LR
+    subgraph PR["Pull request contra main"]
+        A[Comentario: CI/CD en acción] --> B[Pruebas unitarias] --> C[Comentario: CI/CD terminado con éxito]
+    end
+    subgraph MAIN["Commit en main (merge)"]
+        D[Pruebas unitarias] --> E[Construir imagen Docker] --> F[Publicar en GitHub Packages]
+    end
+```
+
+| Evento | Tareas |
+|---|---|
+| **PR contra `main`** | 1. Comenta en el PR *"CI/CD en acción. Ejecutando tareas …"* · 2. Entrena el modelo y corre `pytest` · 3. Si todo pasa, comenta *"CI/CD terminado con éxito."* |
+| **Commit en `main`** | 1. Vuelve a correr las pruebas unitarias · 2. Construye la imagen (etapa `servicio` del Dockerfile) y la publica en `ghcr.io` con las etiquetas `latest` y `sha-<commit>` |
+
+Usar la imagen publicada, sin construirla:
+
+```bash
+docker pull ghcr.io/paperllm468/prediccion_enfermedades-mlops-u2:latest
+```
+
+```bash
+docker run -d -p 5000:5000 --name modelo-medico ghcr.io/paperllm468/prediccion_enfermedades-mlops-u2:latest
+```
