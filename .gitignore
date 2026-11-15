@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.env
+.pytest_cache/
+
+# Artefactos que GENERA el pipeline (no se versionan)
+data/
+models/
+reports/
+logs/
+
+# Editores / sistema
+.vscode/
+.idea/
+.DS_Store
