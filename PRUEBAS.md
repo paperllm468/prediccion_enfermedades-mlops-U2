@@ -16,7 +16,7 @@ Al ejecutar `docker build -t modelo-medico .` la consola debe mostrar el pipelin
 | 4 | `[entrenamiento] CV regresion_logistica / arbol_decision / random_forest: F1 macro = ...` | Se compararon 3 modelos con validación cruzada |
 | 5 | `[entrenamiento] Mejor modelo en validación cruzada: ...` | Selección automática del modelo |
 | 6 | `[entrenamiento] Prueba: accuracy=... F1 macro=...` | Evaluación en datos no vistos |
-| 7 | `[entrenamiento] Puertas de calidad superadas...` | F1 ≥ 0.80 y los 4 casos de referencia correctos |
+| 7 | `[entrenamiento] Puertas de calidad superadas...` | F1 ≥ 0.80 y los 5 casos de referencia correctos |
 | 8 | `Pipeline completado con éxito.` | El modelo quedó registrado |
 
 > Si el modelo no pasa las puertas de calidad, aparece `RuntimeError: Modelo rechazado...` o `Prueba de humo fallida...` y la imagen **no se construye**. Ese es el comportamiento deseado.
@@ -34,7 +34,7 @@ Al ejecutar `docker build -t modelo-medico .` la consola debe mostrar el pipelin
 
 ---
 
-## 3. Predicciones: los 4 estados
+## 3. Predicciones: los 5 estados
 
 Plantilla de petición (cambiar los valores):
 
@@ -48,6 +48,7 @@ curl -X POST http://localhost:5000/predecir -H "Content-Type: application/json" 
 | 14 | 37.8 | 3 | 4 | **ENFERMEDAD LEVE** |
 | 15 | 39.5 | 2 | 8 | **ENFERMEDAD AGUDA** |
 | 16 | 37.6 | 90 | 5 | **ENFERMEDAD CRÓNICA** |
+| 16b | 37.0 | 365 | 9 | **ENFERMEDAD TERMINAL** |
 
 Estos casos están garantizados: el pipeline los verifica antes de publicar el modelo.
 
@@ -59,6 +60,7 @@ Otros ejemplos, lejos de las fronteras entre clases:
 | 18 | 38.2 | 5 | 5 | ENFERMEDAD LEVE |
 | 19 | 40.5 | 3 | 9 | ENFERMEDAD AGUDA |
 | 20 | 38.0 | 200 | 5 | ENFERMEDAD CRÓNICA |
+| 20b | 38.5 | 400 | 10 | ENFERMEDAD TERMINAL |
 
 > Como es un modelo de ML (no reglas fijas), **cerca de las fronteras** (por ejemplo, temperatura 37.5 o 30–31 días) puede equivocarse ocasionalmente. Es normal y se refleja en las métricas de `reports/metricas.json`.
 

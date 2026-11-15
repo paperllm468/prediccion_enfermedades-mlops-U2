@@ -14,7 +14,7 @@ entrenamiento.py — Etapas 4 y 5: Entrenamiento, validación y registro del mod
     3. Re-entrena el mejor modelo y lo evalúa en el conjunto de prueba.
     4. Puertas de calidad (si alguna falla, el modelo NO se publica):
            a) F1 macro en prueba >= config.UMBRAL_F1_MINIMO
-           b) Prueba de humo: los casos de referencia producen los 4 estados.
+           b) Prueba de humo: los casos de referencia producen los 5 estados.
     5. Registra el modelo: models/modelo.joblib + models/metadatos.json
        (versión, fecha, métricas, hash de los datos, versión de scikit-learn).
 

@@ -48,7 +48,8 @@ NO_ENFERMO = "NO ENFERMO"
 ENFERMEDAD_LEVE = "ENFERMEDAD LEVE"
 ENFERMEDAD_AGUDA = "ENFERMEDAD AGUDA"
 ENFERMEDAD_CRONICA = "ENFERMEDAD CRÓNICA"
-ESTADOS = [NO_ENFERMO, ENFERMEDAD_LEVE, ENFERMEDAD_AGUDA, ENFERMEDAD_CRONICA]
+ENFERMEDAD_TERMINAL = "ENFERMEDAD TERMINAL"
+ESTADOS = [NO_ENFERMO, ENFERMEDAD_LEVE, ENFERMEDAD_AGUDA, ENFERMEDAD_CRONICA, ENFERMEDAD_TERMINAL]
 
 # Rangos clínicamente válidos de cada variable (mínimo, máximo)
 RANGOS = {
@@ -58,10 +59,11 @@ RANGOS = {
 }
 
 # Casos de referencia: el modelo publicado DEBE predecir correctamente cada uno.
-# Garantizan que el servicio puede retornar los 4 estados (prueba de humo).
+# Garantizan que el servicio puede retornar los 5 estados (prueba de humo).
 CASOS_REFERENCIA = [
     ({"temperatura": 36.5, "dias_sintomas": 0, "intensidad_dolor": 0}, NO_ENFERMO),
     ({"temperatura": 37.8, "dias_sintomas": 3, "intensidad_dolor": 4}, ENFERMEDAD_LEVE),
     ({"temperatura": 39.5, "dias_sintomas": 2, "intensidad_dolor": 8}, ENFERMEDAD_AGUDA),
     ({"temperatura": 37.6, "dias_sintomas": 90, "intensidad_dolor": 5}, ENFERMEDAD_CRONICA),
+    ({"temperatura": 37.0, "dias_sintomas": 365, "intensidad_dolor": 9}, ENFERMEDAD_TERMINAL),
 ]

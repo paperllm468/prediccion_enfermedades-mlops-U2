@@ -58,7 +58,7 @@ def resumen_texto(df_raw, df):
 def grafica_distribucion_clases(df):
     conteo = df[config.OBJETIVO].value_counts().reindex(config.ESTADOS)
     fig, ax = plt.subplots(figsize=(8, 4))
-    ax.bar(conteo.index, conteo.values, color=["#16a34a", "#ca8a04", "#dc2626", "#7c3aed"])
+    ax.bar(conteo.index, conteo.values, color=["#16a34a", "#ca8a04", "#dc2626", "#7c3aed", "#374151"])
     ax.set_title("Distribución de clases")
     ax.set_ylabel("Número de pacientes")
     fig.tight_layout()

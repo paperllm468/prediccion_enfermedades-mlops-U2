@@ -10,6 +10,7 @@ Este proyecto implementa, de principio a fin, un modelo de Machine Learning que 
 | **ENFERMEDAD LEVE** | Síntomas moderados en un cuadro reciente |
 | **ENFERMEDAD AGUDA** | Fiebre alta o dolor intenso en un cuadro reciente |
 | **ENFERMEDAD CRÓNICA** | Síntomas que persisten por más de 30 días |
+| **ENFERMEDAD TERMINAL** | Más de 180 días con síntomas y dolor severo (≥ 8) |
 
 El proyecto sigue el flujo de un proyecto de ML real: **datos → limpieza → EDA → entrenamiento → validación → registro → despliegue → predicción → monitoreo**. Todo queda empaquetado en una imagen **Docker**: al construirla se entrena el modelo, y al correrla el médico lo consulta desde el navegador o por API, sin instalar Python.
 
@@ -198,6 +199,7 @@ Respuesta (las probabilidades exactas dependen del entrenamiento):
   "probabilidades": {
     "ENFERMEDAD AGUDA": 0.97,
     "ENFERMEDAD CRÓNICA": 0.0,
+    "ENFERMEDAD TERMINAL": 0.0,
     "ENFERMEDAD LEVE": 0.02,
     "NO ENFERMO": 0.01
   },
@@ -233,8 +235,9 @@ curl http://localhost:5000/modelo/info
 | 37.8 | 3 | 4 | ENFERMEDAD LEVE |
 | 39.5 | 2 | 8 | ENFERMEDAD AGUDA |
 | 37.6 | 90 | 5 | ENFERMEDAD CRÓNICA |
+| 37.0 | 365 | 9 | ENFERMEDAD TERMINAL |
 
-Estos 4 casos son los **casos de referencia** (`src/config.py`). El pipeline verifica que el modelo los prediga correctamente antes de publicarlo; si no lo hace, la imagen no se construye.
+Estos 5 casos son los **casos de referencia** (`src/config.py`). El pipeline verifica que el modelo los prediga correctamente antes de publicarlo; si no lo hace, la imagen no se construye.
 
 ---
 
