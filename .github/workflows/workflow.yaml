@@ -103,7 +103,9 @@ jobs:
   publicar-imagen:
     name: Construir y publicar imagen Docker
     needs: pruebas-unitarias
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # always() evita que el job se salte porque "comentario-inicio" (solo PRs)
+    # aparece como skipped en la cadena de dependencias; igual exige pruebas OK.
+    if: ${{ always() && needs.pruebas-unitarias.result == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
