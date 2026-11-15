@@ -38,6 +38,7 @@ Todas las rutas, parámetros e hiperparámetros generales están en un solo arch
 | Regla (en orden) | Diagnóstico |
 |---|---|
 | temperatura < 37.5 y dolor ≤ 2 | NO ENFERMO |
+| días > 180 y dolor ≥ 8 | ENFERMEDAD TERMINAL |
 | días > 30 | ENFERMEDAD CRÓNICA |
 | temperatura ≥ 39 o dolor ≥ 7 | ENFERMEDAD AGUDA |
 | resto | ENFERMEDAD LEVE |
@@ -107,7 +108,7 @@ Todas las rutas, parámetros e hiperparámetros generales están en un solo arch
 4. Se re-entrena el mejor con todo el conjunto de entrenamiento y se **evalúa en prueba**: accuracy, F1 macro, precisión/recall/F1 por clase y matriz de confusión.
 5. **Puertas de calidad** (`verificar_calidad`):
    - F1 macro en prueba ≥ 0.80.
-   - **Prueba de humo:** los 4 casos de referencia deben dar su estado esperado. Esto garantiza que el servicio puede devolver **los 4 estados**.
+   - **Prueba de humo:** los 5 casos de referencia deben dar su estado esperado. Esto garantiza que el servicio puede devolver **los 5 estados**.
    - Si algo falla, se lanza un error y el pipeline (y el `docker build`) se detiene: **un modelo malo nunca llega al médico**.
 
 **Salida:** `reports/metricas.json`.

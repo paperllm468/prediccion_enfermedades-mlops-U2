@@ -26,14 +26,17 @@ def diagnostico_medico(temperatura, dias_sintomas, intensidad_dolor):
 
     Reglas clínicas usadas para etiquetar los datos de entrenamiento:
         1. Sin fiebre (< 37.5 °C) y dolor mínimo (<= 2)       -> NO ENFERMO
-        2. Síntomas por más de 30 días                         -> ENFERMEDAD CRÓNICA
-        3. Fiebre alta (>= 39 °C) o dolor intenso (>= 7)       -> ENFERMEDAD AGUDA
-        4. Cualquier otro caso                                 -> ENFERMEDAD LEVE
+        2. Más de 180 días con síntomas y dolor severo (>= 8)  -> ENFERMEDAD TERMINAL
+        3. Síntomas por más de 30 días                         -> ENFERMEDAD CRÓNICA
+        4. Fiebre alta (>= 39 °C) o dolor intenso (>= 7)       -> ENFERMEDAD AGUDA
+        5. Cualquier otro caso                                 -> ENFERMEDAD LEVE
 
     El modelo de ML NO conoce estas reglas: debe aprenderlas a partir de los datos.
     """
     if temperatura < 37.5 and intensidad_dolor <= 2:
         return config.NO_ENFERMO
+    if dias_sintomas > 180 and intensidad_dolor >= 8:
+        return config.ENFERMEDAD_TERMINAL
     if dias_sintomas > 30:
         return config.ENFERMEDAD_CRONICA
     if temperatura >= 39.0 or intensidad_dolor >= 7:
@@ -50,6 +53,12 @@ def _generar_pacientes(n, rng):
     dias_sintomas = np.where(es_prolongado, rng.integers(31, 366, n), rng.integers(0, 31, n))
 
     intensidad_dolor = rng.integers(0, 11, n)
+
+    # ~5 % de pacientes en fase terminal: cuadro muy prolongado y dolor severo
+    # (clase minoritaria, como una enfermedad huérfana)
+    es_terminal = rng.random(n) < 0.05
+    dias_sintomas = np.where(es_terminal, rng.integers(181, 731, n), dias_sintomas)
+    intensidad_dolor = np.where(es_terminal, rng.integers(8, 11, n), intensidad_dolor)
     edad = rng.integers(0, 96, n)
     sexo = rng.choice(["F", "M"], n)
 

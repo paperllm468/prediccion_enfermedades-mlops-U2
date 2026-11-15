@@ -7,8 +7,8 @@ el servicio web para responder al médico.
 Función principal:
     predecir(temperatura, dias_sintomas, intensidad_dolor) -> str
 
-Retorna uno de los 4 estados:
-    NO ENFERMO | ENFERMEDAD LEVE | ENFERMEDAD AGUDA | ENFERMEDAD CRÓNICA
+Retorna uno de los 5 estados:
+    NO ENFERMO | ENFERMEDAD LEVE | ENFERMEDAD AGUDA | ENFERMEDAD CRÓNICA | ENFERMEDAD TERMINAL
 
 Cada predicción se registra en logs/predicciones.csv. Ese registro es la base
 del MONITOREO: permite detectar cambios en los datos de entrada (data drift) y,
