@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Predicción de estado del paciente</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; background: #f2f5f8; color: #1f2933; margin: 0; padding: 16px; }
+    .tarjeta { max-width: 480px; margin: 32px auto; background: #fff; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    h1 { font-size: 1.4rem; margin-top: 0; }
+    p.nota { font-size: .85rem; color: #52606d; }
+    label { display: block; margin-top: 14px; font-weight: bold; }
+    small { color: #52606d; font-weight: normal; }
+    input { width: 100%; box-sizing: border-box; padding: 8px; margin-top: 4px; border: 1px solid #cbd2d9; border-radius: 6px; font-size: 1rem; }
+    button { margin-top: 20px; width: 100%; padding: 10px; background: #2563eb; color: #fff; border: 0; border-radius: 6px; font-size: 1rem; cursor: pointer; }
+    button:hover { background: #1d4ed8; }
+    .resultado { margin-top: 20px; padding: 14px; border-radius: 6px; font-size: 1.1rem; }
+    .resultado ul { margin: 8px 0 0; padding-left: 18px; font-size: .9rem; }
+    .NO-ENFERMO { background: #dcfce7; color: #166534; }
+    .ENFERMEDAD-LEVE { background: #fef9c3; color: #854d0e; }
+    .ENFERMEDAD-AGUDA { background: #fee2e2; color: #991b1b; }
+    .ENFERMEDAD-CRÓNICA { background: #ede9fe; color: #5b21b6; }
+    .error { background: #fee2e2; color: #991b1b; margin-top: 20px; padding: 12px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <div class="tarjeta">
+    <h1>Predicción de estado del paciente</h1>
+    <p class="nota">Herramienta de apoyo al diagnóstico basada en un modelo de Machine Learning. La decisión final es del médico.</p>
+
+    <form method="post" action="/">
+      <label for="temperatura">Temperatura corporal (°C)
+        <small>[{{ rangos.temperatura[0] }} - {{ rangos.temperatura[1] }}]</small></label>
+      <input type="number" step="0.1" id="temperatura" name="temperatura" required
+             min="{{ rangos.temperatura[0] }}" max="{{ rangos.temperatura[1] }}"
+             value="{{ valores.get('temperatura', '') }}">
+
+      <label for="dias_sintomas">Días con síntomas
+        <small>[{{ rangos.dias_sintomas[0] }} - {{ rangos.dias_sintomas[1] }}]</small></label>
+      <input type="number" step="1" id="dias_sintomas" name="dias_sintomas" required
+             min="{{ rangos.dias_sintomas[0] }}" max="{{ rangos.dias_sintomas[1] }}"
+             value="{{ valores.get('dias_sintomas', '') }}">
+
+      <label for="intensidad_dolor">Intensidad del dolor
+        <small>[{{ rangos.intensidad_dolor[0] }} - {{ rangos.intensidad_dolor[1] }}]</small></label>
+      <input type="number" step="1" id="intensidad_dolor" name="intensidad_dolor" required
+             min="{{ rangos.intensidad_dolor[0] }}" max="{{ rangos.intensidad_dolor[1] }}"
+             value="{{ valores.get('intensidad_dolor', '') }}">
+
+      <button type="submit">Predecir</button>
+    </form>
+
+    {% if detalle %}
+      <div class="resultado {{ detalle.estado | replace(' ', '-') }}">
+        <strong>Resultado:</strong> {{ detalle.estado }}
+        <ul>
+          {% for clase, p in detalle.probabilidades.items() %}
+            <li>{{ clase }}: {{ (p * 100) | round(1) }} %</li>
+          {% endfor %}
+        </ul>
+        <small>Versión del modelo: {{ detalle.version_modelo }}</small>
+      </div>
+    {% endif %}
+
+    {% if error %}
+      <div class="error"><strong>Error:</strong> {{ error }}</div>
+    {% endif %}
+  </div>
+</body>
+</html>

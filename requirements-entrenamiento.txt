@@ -1,0 +1,3 @@
+# Dependencias del ENTRENAMIENTO: todo lo del servicio + librerías para el EDA.
+-r requirements.txt
+matplotlib==3.9.0

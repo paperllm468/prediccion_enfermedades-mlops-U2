@@ -1,0 +1,9 @@
+# Dependencias del SERVICIO (producción): lo necesario para cargar el modelo y responder.
+# Las versiones están fijadas para que el modelo se cargue con la misma versión
+# de scikit-learn con la que se entrenó (reproducibilidad).
+numpy==1.26.4
+pandas==2.2.2
+scikit-learn==1.5.1
+joblib==1.4.2
+Flask==3.0.3
+gunicorn==22.0.0

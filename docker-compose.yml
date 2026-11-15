@@ -1,0 +1,21 @@
+# Construir (entrena el modelo) y levantar el servicio con un solo comando:
+#   docker compose up -d --build
+#
+# Re-entrenar con datos nuevos = volver a construir la imagen:
+#   docker compose up -d --build
+services:
+  modelo-medico:
+    build:
+      context: .
+      target: servicio          # Etapa final del Dockerfile multi-etapa
+    image: modelo-medico:1.0
+    container_name: modelo-medico
+    ports:
+      - "5000:5000"
+    volumes:
+      # Conserva el log de predicciones (monitoreo) aunque se borre el contenedor
+      - logs_predicciones:/proyecto/logs
+    restart: unless-stopped
+
+volumes:
+  logs_predicciones:
