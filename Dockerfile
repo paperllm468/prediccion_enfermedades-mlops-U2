@@ -51,7 +51,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Solo el código necesario para predecir y servir
-COPY src/__init__.py src/config.py src/prediccion.py src/
+COPY src/__init__.py src/config.py src/prediccion.py src/estadisticas.py src/
 COPY servicio/ servicio/
 
 # Artefactos producidos en la etapa de entrenamiento:

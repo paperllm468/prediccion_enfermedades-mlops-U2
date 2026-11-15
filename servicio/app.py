@@ -6,6 +6,8 @@ Rutas disponibles:
     GET/POST  /              Página web con formulario para el médico
     POST      /predecir      API JSON: recibe los 3 valores y retorna el estado
     GET       /modelo/info   Metadatos del modelo desplegado (versión, métricas)
+    GET       /estadisticas  Reporte JSON: total por categoría, últimas 5, fecha de la última
+    GET       /reporte       El mismo reporte en una página web para el médico
     GET       /salud         Health check (lo usa Docker)
 
 Uso local (desde la raíz del proyecto, después de entrenar):
@@ -16,10 +18,12 @@ En Docker se ejecuta con gunicorn (ver Dockerfile).
 from flask import Flask, jsonify, render_template, request
 
 from src import config
+from src.estadisticas import generar_reporte
 from src.prediccion import DatosInvalidosError, cargar_metadatos, cargar_modelo, predecir_con_detalle
 
 app = Flask(__name__)
 app.json.ensure_ascii = False  # Devolver tildes (ej. "CRÓNICA") sin escapar
+app.json.sort_keys = False     # Respetar el orden de los estados en las respuestas
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -65,6 +69,24 @@ def predecir_api():
 def info_modelo():
     """Información del modelo en producción (trazabilidad / versionado)."""
     return jsonify(cargar_metadatos())
+
+
+@app.route("/estadisticas", methods=["GET"])
+def estadisticas():
+    """Estadísticas de las predicciones realizadas (leídas de logs/predicciones.csv).
+
+    Respuesta: {"total_predicciones": 7,
+                "total_por_categoria": {"NO ENFERMO": 2, ...},
+                "ultimas_predicciones": [... 5 más recientes, la última primero ...],
+                "fecha_ultima_prediccion": "2026-11-15T01:10:00+00:00"}
+    """
+    return jsonify(generar_reporte())
+
+
+@app.route("/reporte", methods=["GET"])
+def reporte():
+    """Página web con las estadísticas de las predicciones."""
+    return render_template("reporte.html", reporte=generar_reporte())
 
 
 @app.route("/salud", methods=["GET"])
