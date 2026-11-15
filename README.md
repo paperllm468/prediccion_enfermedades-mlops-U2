@@ -2,6 +2,11 @@
 
 Servicio de predicción de estado del paciente (ML + Flask + Docker), versionado en GitHub y con CI/CD en GitHub Actions.
 
+## Integrantes
+
+- Nicolai Potes
+- Carlos Villada
+
 ## El problema
 
 En medicina existe mucha información de los pacientes, pero para las enfermedades **huérfanas** (poco comunes) los datos escasean. Se necesita un modelo que, a partir de los síntomas de un paciente, estime si puede sufrir alguna enfermedad, tanto para enfermedades comunes (muchos datos) como huérfanas (pocos datos).
@@ -25,6 +30,8 @@ La rama `main` está **protegida**: solo recibe cambios por pull request.
 | `reporte-estadisticas` | Nueva funcionalidad: reporte de estadísticas de las predicciones | #3 |
 | `añadir-github-actions` | Pruebas unitarias y pipeline de CI/CD | #4 |
 | `corregir-publicacion-imagen` | Corrección de la publicación de la imagen en `main` | #5 |
+| `actualizar-readme` | README combinado (problema, propósito y ramas) y rutas corregidas | #6 |
+| `agregar-integrantes` | Integrantes del proyecto en el README | #7 |
 
 ---
 
