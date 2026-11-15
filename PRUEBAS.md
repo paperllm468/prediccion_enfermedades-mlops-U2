@@ -86,4 +86,7 @@ En la página web, el navegador bloquea primero los valores fuera de rango (atri
 | # | Prueba | Cómo | Resultado esperado |
 |---|---|---|---|
 | 27 | Log de predicciones | Hacer varias consultas y luego `docker exec modelo-medico cat logs/predicciones.csv` | Una fila por consulta: fecha, 3 entradas, estado y versión del modelo |
+| 28a | Estadísticas vacías | Con el contenedor recién creado: `curl http://localhost:5000/estadisticas` | Conteos en 0, `ultimas_predicciones: []`, `fecha_ultima_prediccion: null` |
+| 28b | Estadísticas tras predecir | Hacer varias consultas a `/predecir` y repetir `curl http://localhost:5000/estadisticas` | Conteo por categoría correcto, las últimas 5 (la más reciente primero) y la fecha de la última |
+| 28c | Reporte web | Abrir `http://localhost:5000/reporte` | Las mismas estadísticas en tablas |
 | 28 | Reportes del entrenamiento | `docker exec modelo-medico cat reports/metricas.json` | Accuracy, F1 macro, reporte por clase y matriz de confusión |

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reporte de predicciones</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; background: #f2f5f8; color: #1f2933; margin: 0; padding: 16px; }
+    .tarjeta { max-width: 640px; margin: 32px auto; background: #fff; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    h1 { font-size: 1.4rem; margin-top: 0; }
+    h2 { font-size: 1.05rem; margin-top: 24px; }
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #e4e7eb; }
+    th { background: #f5f7fa; }
+    td.num { text-align: right; }
+    .vacio { color: #52606d; font-style: italic; }
+    .destacado { font-size: 1.05rem; }
+    a { color: #2563eb; }
+    .tabla-scroll { overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <div class="tarjeta">
+    <h1>Reporte de predicciones</h1>
+    <p><a href="/">&larr; Volver al formulario</a> · <a href="/estadisticas">Ver en JSON</a></p>
+
+    <p class="destacado"><strong>Fecha de la última predicción (UTC):</strong>
+      {% if reporte.fecha_ultima_prediccion %}{{ reporte.fecha_ultima_prediccion }}{% else %}<span class="vacio">sin predicciones</span>{% endif %}
+    </p>
+
+    <h2>Total de predicciones por categoría ({{ reporte.total_predicciones }} en total)</h2>
+    <table>
+      <tr><th>Estado</th><th>Predicciones</th></tr>
+      {% for estado, total in reporte.total_por_categoria.items() %}
+        <tr><td>{{ estado }}</td><td class="num">{{ total }}</td></tr>
+      {% endfor %}
+    </table>
+
+    <h2>Últimas 5 predicciones</h2>
+    {% if reporte.ultimas_predicciones %}
+      <div class="tabla-scroll">
+      <table>
+        <tr><th>Fecha (UTC)</th><th>Temp. (°C)</th><th>Días</th><th>Dolor</th><th>Estado</th></tr>
+        {% for p in reporte.ultimas_predicciones %}
+          <tr><td>{{ p.fecha_utc[:19] | replace('T', ' ') }}</td><td>{{ p.temperatura }}</td><td>{{ p.dias_sintomas }}</td>
+              <td>{{ p.intensidad_dolor }}</td><td>{{ p.estado }}</td></tr>
+        {% endfor %}
+      </table>
+      </div>
+    {% else %}
+      <p class="vacio">Aún no se han realizado predicciones.</p>
+    {% endif %}
+  </div>
+</body>
+</html>

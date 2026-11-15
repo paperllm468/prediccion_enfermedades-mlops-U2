@@ -47,6 +47,7 @@ flowchart LR
 | 6. Predicción | `src/prediccion.py` | Valida la entrada y predice el estado con el modelo registrado | Estado + probabilidades |
 | 7. Servicio | `servicio/app.py` | Expone el modelo en una página web y una API REST | `http://localhost:5000` |
 | 8. Monitoreo | `src/prediccion.py` | Registra cada consulta para detectar drift y re-entrenar | `logs/predicciones.csv` |
+| 9. Estadísticas | `src/estadisticas.py` | Lee el log y arma el reporte para los médicos | `/estadisticas`, `/reporte` |
 
 `src/pipeline.py` orquesta las etapas 1 a 5 con un solo comando: `python -m src.pipeline`.
 
@@ -65,10 +66,13 @@ parte2_docker/
 │   ├── eda.py                        # 3. Análisis exploratorio
 │   ├── entrenamiento.py              # 4-5. Entrenamiento, validación, registro
 │   ├── prediccion.py                 # 6. Predicción + log de monitoreo
+│   ├── estadisticas.py               # 9. Reporte de las predicciones realizadas
 │   └── pipeline.py                   # Orquestador de las etapas 1 a 5
 ├── servicio/                         # Despliegue
 │   ├── app.py                        # 7. API Flask + página web
-│   └── templates/index.html          # Formulario para el médico
+│   └── templates/
+│       ├── index.html                # Formulario para el médico
+│       └── reporte.html              # Reporte de estadísticas
 ├── requirements.txt                  # Dependencias del servicio (producción)
 ├── requirements-entrenamiento.txt    # + dependencias del entrenamiento (matplotlib)
 ├── Dockerfile                        # Multi-etapa: entrenamiento -> servicio
@@ -222,12 +226,58 @@ También funciona con **Postman**: `POST http://localhost:5000/predecir`, *Body 
 |---|---|
 | `GET /salud` | Verifica que el servicio esté activo y el modelo cargado |
 | `GET /modelo/info` | Versión del modelo, algoritmo elegido, métricas, fecha y hash de los datos de entrenamiento |
+| `GET /estadisticas` | Reporte de predicciones en JSON (ver 8.4) |
+| `GET /reporte` | Reporte de predicciones en una página web |
 
 ```bash
 curl http://localhost:5000/modelo/info
 ```
 
-### 8.4 Ejemplos de entrada para cada estado
+### 8.4 Reporte de estadísticas de las predicciones
+
+Cada predicción (web o API) se exporta a `logs/predicciones.csv`. A partir de ese archivo el servicio arma un reporte con:
+
+- **Número total de predicciones por cada categoría** (los 5 estados, incluidos los que tienen 0).
+- **Últimas 5 predicciones** realizadas (la más reciente primero).
+- **Fecha de la última predicción** (UTC).
+
+Página web: abrir **http://localhost:5000/reporte** (también hay un enlace en el formulario).
+
+API:
+
+```bash
+curl http://localhost:5000/estadisticas
+```
+
+```json
+{
+  "total_predicciones": 2,
+  "total_por_categoria": {
+    "NO ENFERMO": 0,
+    "ENFERMEDAD LEVE": 0,
+    "ENFERMEDAD AGUDA": 1,
+    "ENFERMEDAD CRÓNICA": 0,
+    "ENFERMEDAD TERMINAL": 1
+  },
+  "ultimas_predicciones": [
+    {"fecha_utc": "2026-11-15T01:12:30+00:00", "temperatura": 37.0, "dias_sintomas": 365, "intensidad_dolor": 9, "estado": "ENFERMEDAD TERMINAL", "version_modelo": "20261115010607"},
+    {"fecha_utc": "2026-11-15T01:12:10+00:00", "temperatura": 39.5, "dias_sintomas": 2, "intensidad_dolor": 8, "estado": "ENFERMEDAD AGUDA", "version_modelo": "20261115010607"}
+  ],
+  "fecha_ultima_prediccion": "2026-11-15T01:12:30+00:00"
+}
+```
+
+Sin predicciones todavía, el reporte trae los valores por defecto: todos los conteos en `0`, `ultimas_predicciones` vacía y `fecha_ultima_prediccion` en `null`.
+
+Desde la consola del contenedor:
+
+```bash
+docker exec modelo-medico python -m src.estadisticas
+```
+
+> Con Docker Compose el log vive en el volumen `logs_predicciones`, así que las estadísticas se conservan aunque se recree el contenedor.
+
+### 8.5 Ejemplos de entrada para cada estado
 
 | temperatura | dias_sintomas | intensidad_dolor | Resultado |
 |---|---|---|---|
