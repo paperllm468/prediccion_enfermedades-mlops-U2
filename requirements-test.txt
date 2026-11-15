@@ -1,0 +1,3 @@
+# Dependencias para correr las pruebas unitarias (CI y local)
+-r requirements-entrenamiento.txt
+pytest==8.3.3

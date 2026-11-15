@@ -1,0 +1,145 @@
+# =====================================================================
+# CI/CD del servicio de predicción de enfermedades
+#
+# Evento 1: cada PR contra main
+#   1. Comenta en el PR: "CI/CD en acción. Ejecutando tareas …"
+#   2. Corre las pruebas unitarias (pytest)
+#   3. Comenta en el PR: "CI/CD terminado con éxito."
+#
+# Evento 2: cada commit en main (merge de un PR; main está protegida)
+#   1. Vuelve a correr las pruebas unitarias (verificación final)
+#   2. Construye la imagen Docker y la publica en GitHub Packages (ghcr.io)
+# =====================================================================
+name: CI/CD
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Permisos mínimos por defecto; cada job pide solo lo que necesita
+permissions:
+  contents: read
+
+# Si llega un commit nuevo al mismo PR, se cancela la ejecución anterior
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # -------------------------------------------------------------------
+  # Evento 1 - tarea 1: aviso de inicio en el PR
+  # -------------------------------------------------------------------
+  comentario-inicio:
+    name: Comentar inicio en el PR
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Comentar "CI/CD en acción"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} \
+            --repo ${{ github.repository }} \
+            --body "CI/CD en acción. Ejecutando tareas …"
+
+  # -------------------------------------------------------------------
+  # Evento 1 - tarea 2 y Evento 2 - tarea 1: pruebas unitarias
+  # En un PR corre después del comentario de inicio; en main corre directo.
+  # -------------------------------------------------------------------
+  pruebas-unitarias:
+    name: Pruebas unitarias
+    needs: comentario-inicio
+    if: ${{ always() && (needs.comentario-inicio.result == 'success' || needs.comentario-inicio.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v7
+
+      - name: Instalar Python 3.12
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-entrenamiento.txt
+            requirements-test.txt
+
+      - name: Instalar dependencias
+        run: pip install -r requirements-test.txt
+
+      - name: Entrenar el modelo (pipeline de ML + puertas de calidad)
+        run: python -m src.pipeline
+
+      - name: Correr pruebas unitarias
+        run: pytest
+
+  # -------------------------------------------------------------------
+  # Evento 1 - tarea 3: aviso de éxito en el PR
+  # -------------------------------------------------------------------
+  comentario-fin:
+    name: Comentar éxito en el PR
+    needs: pruebas-unitarias
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Comentar "CI/CD terminado con éxito"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} \
+            --repo ${{ github.repository }} \
+            --body "CI/CD terminado con éxito."
+
+  # -------------------------------------------------------------------
+  # Evento 2 - tarea 2: construir y publicar la imagen en GitHub Packages
+  # -------------------------------------------------------------------
+  publicar-imagen:
+    name: Construir y publicar imagen Docker
+    needs: pruebas-unitarias
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v7
+
+      - name: Preparar Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Iniciar sesión en GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Los nombres de imagen en el registro deben ir en minúsculas (el repo tiene "U2")
+      - name: Nombre de la imagen en minúsculas
+        run: echo "IMAGEN=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
+      - name: Definir nombre y etiquetas de la imagen
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.IMAGEN }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=sha-
+
+      - name: Construir y publicar la imagen
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          target: servicio
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
