@@ -1,4 +1,32 @@
-# Servicio de predicción de estado del paciente (ML + Flask + Docker)
+# Predicción de enfermedades: MLOps (Unidad 2)
+
+Servicio de predicción de estado del paciente (ML + Flask + Docker), versionado en GitHub y con CI/CD en GitHub Actions.
+
+## El problema
+
+En medicina existe mucha información de los pacientes, pero para las enfermedades **huérfanas** (poco comunes) los datos escasean. Se necesita un modelo que, a partir de los síntomas de un paciente, estime si puede sufrir alguna enfermedad, tanto para enfermedades comunes (muchos datos) como huérfanas (pocos datos).
+
+## Propósito del repositorio
+
+Llevar un control de versiones ordenado de la solución local que se construyó para el médico en la unidad 1, y de su evolución:
+
+- Guardar el código de la solución inicial tal como se presentó en la unidad 1.
+- Incorporar los nuevos requerimientos de los médicos mediante **ramas** y **pull requests**, para que cada cambio quede trazable.
+- Automatizar las pruebas y la publicación de la imagen Docker con **GitHub Actions** (CI/CD).
+
+## Ramas y pull requests
+
+La rama `main` está **protegida**: solo recibe cambios por pull request.
+
+| Rama | Qué aporta | PR |
+|---|---|---|
+| `solución-inicial` | Archivos de la unidad 1 y el README de la semana 2 | #1 |
+| `nueva-categoria-terminal` | Nueva predicción: **ENFERMEDAD TERMINAL** (5 categorías) | #2 |
+| `reporte-estadisticas` | Nueva funcionalidad: reporte de estadísticas de las predicciones | #3 |
+| `añadir-github-actions` | Pruebas unitarias y pipeline de CI/CD | #4 |
+| `corregir-publicacion-imagen` | Corrección de la publicación de la imagen en `main` | #5 |
+
+---
 
 ## 1. Finalidad
 
@@ -58,7 +86,7 @@ En [`PROCESO_ML.md`](PROCESO_ML.md) se explica cada etapa en detalle, con las de
 ## 3. Estructura del proyecto
 
 ```
-parte2_docker/
+prediccion_enfermedades-mlops-U2/
 ├── src/                              # Código del pipeline de ML
 │   ├── config.py                     # Rutas, parámetros, variables, umbrales de calidad
 │   ├── ingesta.py                    # 1. Ingesta (simulación de la fuente clínica)
@@ -117,11 +145,17 @@ Si un valor no es numérico o está fuera de rango, el servicio responde con un 
 
 ## 6. Cómo construir la imagen
 
-Ubicarse en la carpeta `parte2_docker` (donde está el `Dockerfile`):
+Clonar el repositorio y ubicarse en su raíz (donde está el `Dockerfile`):
 
 ```bash
-cd parte2_docker
+git clone https://github.com/paperllm468/prediccion_enfermedades-mlops-U2.git
 ```
+
+```bash
+cd prediccion_enfermedades-mlops-U2
+```
+
+> También se puede usar la imagen ya publicada en GitHub Packages, sin construirla (ver sección 14).
 
 ```bash
 docker build -t modelo-medico .
@@ -353,7 +387,7 @@ docker compose down
 
 ## 12. (Opcional) Ejecutar sin Docker
 
-Con Python 3.12, desde la carpeta `parte2_docker`:
+Con Python 3.12, desde la raíz del repositorio:
 
 ```bash
 pip install -r requirements-entrenamiento.txt
